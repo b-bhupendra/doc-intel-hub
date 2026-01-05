@@ -24,3 +24,5 @@ data/raw_pdfs/
 .vscode/
 .idea/
 .DS_Store
+*.log
+app.log
