@@ -17,7 +17,9 @@ class DocumentRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # One-to-Many relationship with Versions
-    versions: Mapped[List["DocumentVersion"]] = relationship(back_populates="document")
+    versions: Mapped[List["DocumentVersion"]] = relationship(
+        back_populates="document", cascade="all, delete-orphan"
+    )
 
 class DocumentVersion(Base):
     __tablename__ = "document_versions"
@@ -31,7 +33,9 @@ class DocumentVersion(Base):
     ingested_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     document: Mapped["DocumentRecord"] = relationship(back_populates="versions")
-    pages: Mapped[List["Page"]] = relationship(back_populates="version")
+    pages: Mapped[List["Page"]] = relationship(
+        back_populates="version", cascade="all, delete-orphan"
+    )
 
 class Page(Base):
     __tablename__ = "pages"
@@ -46,7 +50,9 @@ class Page(Base):
     ocr_applied: Mapped[bool] = mapped_column(Boolean, default=False)
 
     version: Mapped["DocumentVersion"] = relationship(back_populates="pages")
-    chunks: Mapped[List["Chunk"]] = relationship(back_populates="page")
+    chunks: Mapped[List["Chunk"]] = relationship(
+        back_populates="page", cascade="all, delete-orphan"
+    )
 
 class Chunk(Base):
     __tablename__ = "chunks"
