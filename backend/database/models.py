@@ -1,7 +1,7 @@
 # backend/database/models.py
 from datetime import datetime
 from typing import List
-from sqlalchemy import String, Integer, Boolean, ForeignKey, DateTime
+from sqlalchemy import String, Integer, Float, Boolean, Text, ForeignKey, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
@@ -31,3 +31,18 @@ class DocumentVersion(Base):
     ingested_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     document: Mapped["DocumentRecord"] = relationship(back_populates="versions")
+    pages: Mapped[List["Page"]] = relationship(back_populates="version")
+
+class Page(Base):
+    __tablename__ = "pages"
+
+    id: Mapped[str] = mapped_column(String(128), primary_key=True) 
+    version_id: Mapped[str] = mapped_column(ForeignKey("document_versions.id"))
+    page_number: Mapped[int] = mapped_column(Integer)
+    extraction_method: Mapped[str] = mapped_column(String(32)) 
+    quality_score: Mapped[float] = mapped_column(Float)
+    raw_text: Mapped[str] = mapped_column(Text)
+    cleaned_text: Mapped[str] = mapped_column(Text)
+    ocr_applied: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    version: Mapped["DocumentVersion"] = relationship(back_populates="pages")
