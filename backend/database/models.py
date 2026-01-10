@@ -1,6 +1,6 @@
 # backend/database/models.py
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from sqlalchemy import String, Integer, Float, Boolean, Text, ForeignKey, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -46,3 +46,16 @@ class Page(Base):
     ocr_applied: Mapped[bool] = mapped_column(Boolean, default=False)
 
     version: Mapped["DocumentVersion"] = relationship(back_populates="pages")
+    chunks: Mapped[List["Chunk"]] = relationship(back_populates="page")
+
+class Chunk(Base):
+    __tablename__ = "chunks"
+
+    id: Mapped[str] = mapped_column(String(128), primary_key=True) 
+    page_id: Mapped[str] = mapped_column(ForeignKey("pages.id"))
+    chunk_index: Mapped[int] = mapped_column(Integer)
+    content: Mapped[str] = mapped_column(Text)
+    token_count: Mapped[int] = mapped_column(Integer)
+    vector_id: Mapped[str] = mapped_column(String(128), unique=True) 
+    
+    page: Mapped["Page"] = relationship(back_populates="chunks")
