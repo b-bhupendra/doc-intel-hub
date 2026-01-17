@@ -37,3 +37,14 @@ class DocumentUnderstandingService:
         # Formula prioritizes high valid character ratios and penalizes garbage noise
         quality = (0.5 * alpha_ratio) + (0.2 * word_count_norm) + (0.3 * (1.0 - garbage_ratio))
         return round(quality, 4)
+
+    def clean_document_text(self, text: str) -> str:
+        """
+        Removes control noise while strictly preserving indicators (currency, percentages, clauses).
+        """
+        # Remove hidden control characters but keep standard printables
+        text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f\ufffd]', '', text)
+        text = re.sub(r'\r\n', '\n', text)
+        # Normalize whitespace
+        text = re.sub(r'[ \t]+', ' ', text)
+        return text.strip()
