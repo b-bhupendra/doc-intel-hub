@@ -1,4 +1,5 @@
 import fitz
+import pytesseract
 import re
 from typing import Dict, Any
 from backend.core.logging import get_logger
@@ -48,3 +49,41 @@ class DocumentUnderstandingService:
         # Normalize whitespace
         text = re.sub(r'[ \t]+', ' ', text)
         return text.strip()
+
+    def process_page(self, page: fitz.Page, page_num: int) -> Dict[str, Any]:
+        """
+        Implements the 95/5 escalation rule for a single page.
+        """
+        # 1. Attempt the Fast Path (Native C-level extraction)
+        native_text = page.get_text("text")
+        native_quality = self.calculate_quality_score(native_text)
+        
+        if native_quality >= self.quality_threshold:
+            return {
+                "page_number": page_num + 1,
+                "extraction_method": "NATIVE",
+                "quality_score": native_quality,
+                "raw_text": native_text,
+                "cleaned_text": self.clean_document_text(native_text),
+                "ocr_applied": False
+            }
+
+        # 2. Attempt the Escalation Path (Tesseract OCR Fallback)
+        logger.debug(f"Page {page_num + 1} native quality ({native_quality}) below threshold. Escalating to OCR.")
+        
+        # Render the specific page to a high-res image (Pixmap) in memory
+        pix = page.get_pixmap(dpi=self.dpi)
+        img_bytes = pix.tobytes("png")
+        
+        # Run Multilingual OCR
+        ocr_text = pytesseract.image_to_string(img_bytes, config=self.tesseract_config)
+        ocr_quality = self.calculate_quality_score(ocr_text)
+        
+        return {
+            "page_number": page_num + 1,
+            "extraction_method": "OCR",
+            "quality_score": ocr_quality,
+            "raw_text": ocr_text,
+            "cleaned_text": self.clean_document_text(ocr_text),
+            "ocr_applied": True
+        }
