@@ -1,4 +1,7 @@
-import fitz
+try:
+    import pymupdf as fitz
+except ImportError:
+    import fitz  # Fallback for older PyMuPDF versions
 import pytesseract
 import re
 from typing import Dict, Any
@@ -87,3 +90,22 @@ class DocumentUnderstandingService:
             "cleaned_text": self.clean_document_text(ocr_text),
             "ocr_applied": True
         }
+
+    def process_document(self, file_path: str) -> list:
+        """
+        Iterates through the document and processes each page securely.
+        """
+        pages_data = []
+        doc = fitz.open(file_path)
+        
+        try:
+            for page_num in range(len(doc)):
+                page = doc.load_page(page_num)
+                page_result = self.process_page(page, page_num)
+                pages_data.append(page_result)
+        except Exception as e:
+            logger.error(f"Error processing {file_path}: {e}")
+        finally:
+            doc.close()
+            
+        return pages_data
