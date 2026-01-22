@@ -1,4 +1,5 @@
 # backend/retrieval/chunking.py
+import re
 from typing import List, Dict, Any
 
 def create_structure_aware_chunks(
@@ -8,9 +9,10 @@ def create_structure_aware_chunks(
     overlap_chars: int = 200
 ) -> List[Dict[str, Any]]:
     """
-    Basic text chunking prototype across double-newline paragraph boundaries.
+    Splits text across paragraph breaks and numbered clauses (e.g., 4.1, (a), Section 2).
     """
-    raw_sections = cleaned_text.split("\n\n")
+    split_pattern = r'(?=\n(?:Section\s+\d+|\d+\.\d+|\([a-z0-9]+\)|\b[A-Z\s]{4,}:))'
+    raw_sections = re.split(split_pattern, cleaned_text)
     
     chunks = []
     chunk_idx = 1
@@ -32,7 +34,7 @@ def create_structure_aware_chunks(
                 })
                 chunk_idx += 1
                 current_chunk = section
-                
+
     if current_chunk.strip():
         chunks.append({
             "chunk_id": f"{page_id}-C{chunk_idx}",
