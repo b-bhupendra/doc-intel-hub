@@ -33,7 +33,8 @@ def create_structure_aware_chunks(
                     "content": current_chunk.strip()
                 })
                 chunk_idx += 1
-                current_chunk = section
+                # Maintain contextual continuity across boundary
+                current_chunk = current_chunk[-overlap_chars:] + "\n" + section
 
     if current_chunk.strip():
         chunks.append({
