@@ -33,8 +33,18 @@ def create_structure_aware_chunks(
                     "content": current_chunk.strip()
                 })
                 chunk_idx += 1
-                # Maintain contextual continuity across boundary
                 current_chunk = current_chunk[-overlap_chars:] + "\n" + section
+            else:
+                # Edge case: A single section is larger than the max_chunk_chars limit
+                for i in range(0, len(section), max_chunk_chars - overlap_chars):
+                    sub_part = section[i:i + max_chunk_chars]
+                    chunks.append({
+                        "chunk_id": f"{page_id}-C{chunk_idx}",
+                        "chunk_index": chunk_idx,
+                        "content": sub_part.strip()
+                    })
+                    chunk_idx += 1
+                current_chunk = ""
 
     if current_chunk.strip():
         chunks.append({
