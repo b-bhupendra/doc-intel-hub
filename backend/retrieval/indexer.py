@@ -20,6 +20,9 @@ class ChromaIndexer:
         logger.info(f"Connected to ChromaDB collection: 'enterprise_documents'")
 
     def index_chunks(self, document_title: str, version_id: str, chunks: List[Dict[str, Any]]):
+        """
+        Takes structured chunks, generates embeddings, and pushes them to ChromaDB.
+        """
         if not chunks:
             logger.warning("No chunks provided for indexing.")
             return
@@ -38,3 +41,6 @@ class ChromaIndexer:
                 "chunk_id": chunk['chunk_id'],
                 "chunk_index": chunk['chunk_index']
             })
+
+        logger.debug(f"Generating embeddings for {len(texts)} chunks...")
+        embeddings = self.embedding_service.embed_documents(texts)
