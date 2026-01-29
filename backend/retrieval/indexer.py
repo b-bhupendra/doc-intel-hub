@@ -1,5 +1,6 @@
 # backend/retrieval/indexer.py
 import chromadb
+from typing import List, Dict, Any
 from backend.core.config import settings
 from backend.core.logging import get_logger
 from backend.retrieval.embedding_service import OllamaEmbeddingService
@@ -17,3 +18,23 @@ class ChromaIndexer:
             metadata={"hnsw:space": "cosine"} # Cosine similarity is standard for text embeddings
         )
         logger.info(f"Connected to ChromaDB collection: 'enterprise_documents'")
+
+    def index_chunks(self, document_title: str, version_id: str, chunks: List[Dict[str, Any]]):
+        if not chunks:
+            logger.warning("No chunks provided for indexing.")
+            return
+
+        ids = []
+        texts = []
+        metadatas = []
+
+        for chunk in chunks:
+            vector_id = f"vec_{chunk['chunk_id']}"
+            ids.append(vector_id)
+            texts.append(chunk["content"])
+            metadatas.append({
+                "document_title": document_title,
+                "version_id": version_id,
+                "chunk_id": chunk['chunk_id'],
+                "chunk_index": chunk['chunk_index']
+            })
