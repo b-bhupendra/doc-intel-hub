@@ -44,3 +44,11 @@ class ChromaIndexer:
 
         logger.debug(f"Generating embeddings for {len(texts)} chunks...")
         embeddings = self.embedding_service.embed_documents(texts)
+
+        logger.debug(f"Upserting {len(ids)} vectors into ChromaDB...")
+        self.collection.upsert(
+            ids=ids,
+            embeddings=embeddings,
+            documents=texts,
+            metadatas=metadatas
+        )
