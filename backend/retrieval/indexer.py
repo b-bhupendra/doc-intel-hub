@@ -52,3 +52,6 @@ class ChromaIndexer:
             documents=texts,
             metadatas=metadatas
         )
+        logger.info(f"Successfully indexed {len(ids)} chunks for {document_title}.")
+        
+        return ids
