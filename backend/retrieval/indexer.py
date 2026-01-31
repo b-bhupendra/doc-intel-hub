@@ -33,8 +33,11 @@ class ChromaIndexer:
 
         for chunk in chunks:
             vector_id = f"vec_{chunk['chunk_id']}"
+            
             ids.append(vector_id)
             texts.append(chunk["content"])
+            
+            # This metadata allows for strict pre-filtering during RAG queries[cite: 1]
             metadatas.append({
                 "document_title": document_title,
                 "version_id": version_id,
