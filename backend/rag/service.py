@@ -64,3 +64,35 @@ class GroundedRAGService:
                     similarity_score=similarity
                 ))
         return citations
+
+    def generate_grounded_answer(self, query: str, citations: List[Citation]) -> str:
+        if not citations:
+            return "I could not find relevant information in the enterprise documents to answer your query."
+
+        context_blocks = []
+        for idx, cite in enumerate(citations, 1):
+            context_blocks.append(
+                f"[{idx}] Source: {cite.document_title} (Chunk ID: {cite.chunk_id})\n{cite.content}"
+            )
+        context_str = "\n\n".join(context_blocks)
+
+        system_prompt = (
+            "You are an enterprise document intelligence assistant. "
+            "Answer the user's question using ONLY the provided context citations below. "
+            "If the context does not contain enough information, state that clearly. "
+            "Cite your sources using [1], [2], etc., matching the provided context numbers.\n\n"
+            f"Context:\n{context_str}\n\n"
+            f"User Query: {query}"
+        )
+
+        response = requests.post(
+            self.generation_url,
+            json={"model": self.generation_model, "prompt": system_prompt, "stream": False},
+            timeout=60
+        )
+        return response.json().get("response", "").strip()
+
+    def execute_query(self, query: str) -> RAGResponse:
+        citations = self.retrieve_relevant_chunks(query)
+        answer = self.generate_grounded_answer(query, citations)
+        return RAGResponse(query=query, answer=answer, citations=citations, is_grounded=len(citations) > 0)
