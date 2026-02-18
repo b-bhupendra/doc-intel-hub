@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.core.config import settings
+from backend.api.routers import rag, documents
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -17,3 +18,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(rag.router, prefix="/api/v1/rag", tags=["RAG Engine"])
+app.include_router(documents.router, prefix="/api/v1/docs", tags=["Document Management"])
