@@ -219,3 +219,14 @@ except ImportError:
 - **Why it happens**: Copying generated code from AI chat interfaces that have search grounding enabled can inadvertently copy superscript citation badges (e.g. `[cite: 1]`).
 - **Why `python -m module` didn't crash on import**: In Python grammar, `[cite: 1]` is valid **slice notation** (`sliceable[start:stop]`). When imported, Python successfully parses and compiles the AST. It only raises a runtime `NameError: name 'cite' is not defined` if and when the specific function containing the line is actually called.
 
+
+
+---
+
+## 11. Grounded RAG Orchestration Engine (`backend/rag/service.py`)
+
+### Anti-Hallucination & Grounding Architecture
+The Grounded RAG service bridges dense vector retrieval with LLM response generation:
+- **Vector Retrieval**: Queries ChromaDB cosine space using `OllamaEmbeddingService` with similarity threshold filtering ($1.0 - 	ext{distance} \ge 	ext{SIMILARITY\_RELEVANCE\_THRESHOLD}$).
+- **Empty Citation Guardrail**: If no chunks meet the threshold, returns immediate refusal without calling LLM compute.
+- **Strict Context Citations**: Synthesizes prompt with enumerated citation blocks `[1]`, `[2]`, requiring verifiable attribution in LLM output.
