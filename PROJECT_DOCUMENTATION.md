@@ -230,3 +230,15 @@ The Grounded RAG service bridges dense vector retrieval with LLM response genera
 - **Vector Retrieval**: Queries ChromaDB cosine space using `OllamaEmbeddingService` with similarity threshold filtering ($1.0 - 	ext{distance} \ge 	ext{SIMILARITY\_RELEVANCE\_THRESHOLD}$).
 - **Empty Citation Guardrail**: If no chunks meet the threshold, returns immediate refusal without calling LLM compute.
 - **Strict Context Citations**: Synthesizes prompt with enumerated citation blocks `[1]`, `[2]`, requiring verifiable attribution in LLM output.
+
+
+---
+
+## 12. FastAPI REST Service Layer (`backend/api/`)
+
+### Architecture & Decoupled Routing
+- **Decoupled APIRouter Modules**: Separates `/api/v1/rag` (query orchestration) from `/api/v1/docs` (document lifecycle management).
+- **Dependency Injection**: Utilizes `Depends(get_rag_service)` for flexible mocking and test isolation.
+- **CORS Middleware**: Preconfigured for seamless cross-origin communication with frontend SPAs on `localhost:3000`.
+- **System Health Dynamic Preflight**: `GET /health` runs directory permission checks and live Ollama tag queries, returning HTTP 503 for degraded states.
+- **Auto-Generated Interactive Documentation**: Self-documenting OpenAPI schemas available at `/docs` (Swagger UI) and `/redoc` (ReDoc).
