@@ -242,3 +242,22 @@ The Grounded RAG service bridges dense vector retrieval with LLM response genera
 - **CORS Middleware**: Preconfigured for seamless cross-origin communication with frontend SPAs on `localhost:3000`.
 - **System Health Dynamic Preflight**: `GET /health` runs directory permission checks and live Ollama tag queries, returning HTTP 503 for degraded states.
 - **Auto-Generated Interactive Documentation**: Self-documenting OpenAPI schemas available at `/docs` (Swagger UI) and `/redoc` (ReDoc).
+
+---
+
+## 13. Automated Testing & Evaluation Framework (Phase 10)
+
+### 1. Test Architecture
+The test suite is structured into fast, isolated unit tests and full API contract integration tests:
+- **Unit Tests (`tests/unit/test_ingestion.py`)**:
+  - Validates `DocumentUnderstandingService.calculate_quality_score()` with clean text ($\ge 0.70$) vs. noisy OCR/garbage strings ($< 0.40$).
+  - Verifies `create_structure_aware_chunks()` splitting logic, boundary preservation, and deterministic ID tags (`P01-C001`).
+- **Integration Tests (`tests/integration/test_api.py`)**:
+  - Tests `/health` system preflight check response.
+  - Tests `/api/v1/rag/query` with invalid payload schema (HTTP 422 Unprocessable Entity) and valid query payloads.
+
+### 2. Mathematical Retrieval Evaluation (Recall@K)
+- **Gold Evaluation Benchmark (`data/evaluation/gold_set.json`)**: Curated ground truth question-to-chunk mappings.
+- **Evaluation Runner (`tests/evaluation/evaluate_retrieval.py`)**: Queries the persistent ChromaDB collection using `OllamaEmbeddingService` and calculates Top-K retrieval recall:
+$$\text{Recall@K} = \frac{\text{Number of Ground Truth Chunks in Top K Results}}{\text{Total Evaluation Questions}}$$
+

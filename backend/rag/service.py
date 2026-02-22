@@ -26,6 +26,7 @@ class RAGResponse(BaseModel):
     citations: List[Citation] = Field(default_factory=list)
     latency_seconds: float = 0.0
     is_grounded: bool = True
+    abstained: bool = False
 
 
 class GroundedRAGService:
@@ -123,10 +124,12 @@ class GroundedRAGService:
         """
         citations = self.retrieve_relevant_chunks(query)
         answer = self.generate_grounded_answer(query, citations)
+        is_grounded = len(citations) > 0
 
         return RAGResponse(
             query=query,
             answer=answer,
             citations=citations,
-            is_grounded=len(citations) > 0
+            is_grounded=is_grounded,
+            abstained=not is_grounded
         )
