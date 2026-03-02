@@ -22,6 +22,7 @@ langchain-community>=0.0.28
 # --- API & Observability ---
 fastapi>=0.110.0
 uvicorn>=0.28.0
+python-multipart>=0.0.9
 
 # --- Testing ---
 pytest>=8.0.0
