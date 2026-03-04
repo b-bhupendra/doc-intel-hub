@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from backend.core.config import settings
 from backend.core.health import check_directories, check_ollama_status
-from backend.api.routers import rag, documents
+from backend.api.routers import rag, documents, ingest
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -24,7 +24,8 @@ app.add_middleware(
 
 # Register the decoupled routers
 app.include_router(rag.router, prefix="/api/v1/rag", tags=["RAG Engine"])
-app.include_router(documents.router, prefix="/api/v1/docs", tags=["Document Management"])
+app.include_router(documents.router, prefix="/api/v1/docs", tags=["Document Catalog"])
+app.include_router(ingest.router, prefix="/api/v1/ingest", tags=["Data Pipeline"])
 
 @app.get("/health", tags=["System"])
 def system_health_check():

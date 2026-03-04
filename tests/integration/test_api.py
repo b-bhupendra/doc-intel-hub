@@ -22,3 +22,14 @@ def test_rag_query_endpoint_validation():
     assert response.status_code == 200
     data = response.json()
     assert "abstained" in data or "is_grounded" in data
+
+
+def test_ingest_upload_validation():
+    # Test non-pdf rejection
+    response = client.post(
+        "/api/v1/ingest/upload",
+        files={"file": ("test.txt", b"invalid file contents", "text/plain")}
+    )
+    assert response.status_code == 400
+    assert "Only PDF files are supported" in response.json()["detail"]
+
