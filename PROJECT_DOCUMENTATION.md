@@ -237,7 +237,13 @@ The Grounded RAG service bridges dense vector retrieval with LLM response genera
 ## 12. FastAPI REST Service Layer (`backend/api/`)
 
 ### Architecture & Decoupled Routing
-- **Decoupled APIRouter Modules**: Separates `/api/v1/rag` (query orchestration) from `/api/v1/docs` (document lifecycle management).
+- **Decoupled APIRouter Modules**: Separates `/api/v1/rag` (query orchestration), `/api/v1/docs` (document catalog), and `/api/v1/ingest` (live multipart/form-data ingestion).
+- **Synchronous Ingestion Pipeline (`POST /api/v1/ingest/upload`)**:
+  - Validates PDF MIME type and calculates SHA-256 hash for document-level idempotency and deduplication.
+  - Temporarily stages file in `./data/raw_pdfs/` for C-level PyMuPDF thread processing.
+  - Runs 95/5 OCR escalation triage per page (`DocumentUnderstandingService`).
+  - Generates structure-aware chunks (`DOC-{hash}-P{pageNum}-C{chunkNum}`).
+  - Indexes dense vector embeddings into ChromaDB via `ChromaIndexer` and returns real-time processing telemetry.
 - **Dependency Injection**: Utilizes `Depends(get_rag_service)` for flexible mocking and test isolation.
 - **CORS Middleware**: Preconfigured for seamless cross-origin communication with frontend SPAs on `localhost:3000`.
 - **System Health Dynamic Preflight**: `GET /health` runs directory permission checks and live Ollama tag queries, returning HTTP 503 for degraded states.
