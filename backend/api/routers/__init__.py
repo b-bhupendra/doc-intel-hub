@@ -1,4 +1,4 @@
 # backend/api/routers/__init__.py
-from backend.api.routers import rag, documents, ingest
+from backend.api.routers import rag, documents, ingest, observability
 
-__all__ = ["rag", "documents", "ingest"]
+__all__ = ["rag", "documents", "ingest", "observability"]
