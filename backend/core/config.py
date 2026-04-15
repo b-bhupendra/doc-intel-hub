@@ -1,18 +1,24 @@
 # backend/core/config.py
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Literal, Optional
 
+IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+DEFAULT_DB_URL = "sqlite:////tmp/doc_intel_hub.db" if IS_VERCEL else "sqlite:///./data/doc_intel_hub.db"
+DEFAULT_CHROMA_DIR = "/tmp/chroma_db" if IS_VERCEL else "./data/chroma_db"
+
 
 class Settings(BaseSettings):
-    ENVIRONMENT: str = "development"
+    ENVIRONMENT: str = "production" if IS_VERCEL else "development"
     PROJECT_NAME: str = "Enterprise Document Intelligence Platform"
+    IS_VERCEL: bool = IS_VERCEL
 
     # The Factory Toggle Switch ("offline" | "cloud")
-    AI_MODE: Literal["offline", "cloud"] = "offline"
+    AI_MODE: Literal["offline", "cloud"] = "cloud" if IS_VERCEL else "offline"
 
-    # Storage Paths
-    DATABASE_URL: str = "sqlite:///./data/doc_intel_hub.db"
-    CHROMA_PERSIST_DIR: str = "./data/chroma_db"
+    # Storage Paths (auto-routes to writable /tmp on Vercel)
+    DATABASE_URL: str = DEFAULT_DB_URL
+    CHROMA_PERSIST_DIR: str = DEFAULT_CHROMA_DIR
 
     # Offline Config (Ollama)
     OLLAMA_BASE_URL: str = "http://localhost:11434"
@@ -22,7 +28,7 @@ class Settings(BaseSettings):
     # Cloud Config (Groq / Cohere)
     GROQ_API_KEY: str = ""
     COHERE_API_KEY: str = ""
-    CLOUD_GENERATION_MODEL: str = "llama-3.3-70b-versatile"
+    CLOUD_GENERATION_MODEL: str = "openai/gpt-oss-120b"
     CLOUD_EMBEDDING_MODEL: str = "embed-multilingual-v3.0"
 
     # Backward compatibility overrides if specified in .env

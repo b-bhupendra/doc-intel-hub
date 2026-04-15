@@ -40,8 +40,9 @@ async def ingest_document(file: UploadFile = File(...)):
 
     # 2. Save the file temporarily for PyMuPDF processing
     safe_filename = file.filename.replace(" ", "_")
-    os.makedirs("./data/raw_pdfs", exist_ok=True)
-    file_path = os.path.join("./data/raw_pdfs", f"{file_hash[:8]}_{safe_filename}")
+    raw_dir = "/tmp/raw_pdfs" if settings.IS_VERCEL else "./data/raw_pdfs"
+    os.makedirs(raw_dir, exist_ok=True)
+    file_path = os.path.join(raw_dir, f"{file_hash[:8]}_{safe_filename}")
     
     with open(file_path, "wb") as f:
         f.write(file_bytes)

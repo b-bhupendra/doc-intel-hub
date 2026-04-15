@@ -9,7 +9,10 @@ logger = get_logger("HealthService")
 
 def check_directories() -> bool:
     """Verifies that all required local data paths exist."""
-    required_paths = ["./data/raw_pdfs", "./data/processed", settings.CHROMA_PERSIST_DIR]
+    if settings.IS_VERCEL:
+        required_paths = ["/tmp/raw_pdfs", "/tmp/processed", settings.CHROMA_PERSIST_DIR]
+    else:
+        required_paths = ["./data/raw_pdfs", "./data/processed", settings.CHROMA_PERSIST_DIR]
     for path in required_paths:
         try:
             os.makedirs(path, exist_ok=True)
