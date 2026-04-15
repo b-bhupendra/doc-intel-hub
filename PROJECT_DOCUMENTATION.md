@@ -267,3 +267,18 @@ The test suite is structured into fast, isolated unit tests and full API contrac
 - **Evaluation Runner (`tests/evaluation/evaluate_retrieval.py`)**: Queries the persistent ChromaDB collection using `OllamaEmbeddingService` and calculates Top-K retrieval recall:
 $$\text{Recall@K} = \frac{\text{Number of Ground Truth Chunks in Top K Results}}{\text{Total Evaluation Questions}}$$
 
+---
+
+## 14. Frontend Architecture & Future Engineering Roadmap
+
+### 1. Unified React + TypeScript Single-Page Application (`frontend/`)
+- **Dashboard Interface**: Built with React 19, TailwindCSS v4, Vite 6, and Lucide icons.
+- **Dynamic Document Explorer & Chunk Inspector**: Reads indexed vector collections from ChromaDB dynamically via `/api/v1/rag/documents` and `/api/v1/rag/chunks`.
+- **Live Ingestion Pipeline**: Direct PDF drag-and-drop modal connected to `POST /api/v1/ingest/upload` via `multipart/form-data`.
+- **Phase 9 Observability**: Real-time charts powered by Recharts visualizing native vs. OCR extraction distribution, page quality scores, and query latencies.
+- **OpenAPI 3.1 Interactive Sandbox**: Built-in developer spec modal testing API schemas and generating multi-language code snippets.
+
+### 2. Engineering Roadmap & Pending Enhancements
+All upcoming architectural enhancements, coreference multi-turn chat memory, hybrid search, and asynchronous background worker queues are systematically tracked in **[`TODOS.md`](file:///home/bhupendra/Desktop/doc-intel-hub/TODOS.md)**.
+
+
