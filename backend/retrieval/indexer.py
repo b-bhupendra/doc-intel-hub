@@ -3,21 +3,22 @@ import chromadb
 from typing import List, Dict, Any
 from backend.core.config import settings
 from backend.core.logging import get_logger
-from backend.retrieval.embedding_service import OllamaEmbeddingService
+from backend.retrieval.embedding_service import get_embedding_service, BaseEmbeddingService
 
 logger = get_logger("VectorIndexer")
+
 
 class ChromaIndexer:
     def __init__(self):
         self.chroma_client = chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIR)
-        self.embedding_service = OllamaEmbeddingService()
+        self.embedding_service: BaseEmbeddingService = get_embedding_service()
         
         # Get or create the collection for our document vectors
         self.collection = self.chroma_client.get_or_create_collection(
             name="enterprise_documents",
-            metadata={"hnsw:space": "cosine"} # Cosine similarity is standard for text embeddings
+            metadata={"hnsw:space": "cosine"}  # Cosine similarity is standard for text embeddings
         )
-        logger.info(f"Connected to ChromaDB collection: 'enterprise_documents'")
+        logger.info(f"Connected to ChromaDB collection: 'enterprise_documents' using [{settings.AI_MODE.upper()}] embeddings.")
 
     def index_chunks(self, document_title: str, version_id: str, chunks: List[Dict[str, Any]]):
         """
@@ -37,7 +38,7 @@ class ChromaIndexer:
             ids.append(vector_id)
             texts.append(chunk["content"])
             
-            # This metadata allows for strict pre-filtering during RAG queries[cite: 1]
+            # Metadata allows for strict pre-filtering during RAG queries
             metadatas.append({
                 "document_title": document_title,
                 "version_id": version_id,

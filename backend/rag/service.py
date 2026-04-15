@@ -1,12 +1,12 @@
 # backend/rag/service.py
 from typing import List, Optional
 from pydantic import BaseModel, Field
-import requests
 import chromadb
 
 from backend.core.config import settings
 from backend.core.logging import get_logger
-from backend.retrieval.embedding_service import OllamaEmbeddingService
+from backend.retrieval.embedding_service import get_embedding_service, BaseEmbeddingService
+from backend.rag.llm_service import get_llm_service, BaseLLMService
 
 logger = get_logger("GroundedRAGService")
 
@@ -31,19 +31,20 @@ class RAGResponse(BaseModel):
 
 class GroundedRAGService:
     def __init__(self):
-        self.embedding_service = OllamaEmbeddingService()
+        # Consume active providers from the Factory routers (Ollama vs. Cloud)
+        self.embedding_service: BaseEmbeddingService = get_embedding_service()
+        self.llm_service: BaseLLMService = get_llm_service()
+
         self.chroma_client = chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIR)
         self.collection = self.chroma_client.get_or_create_collection(
             name="enterprise_documents",
             metadata={"hnsw:space": "cosine"}
         )
-        self.generation_url = f"{settings.OLLAMA_BASE_URL}/api/generate"
-        self.generation_model = settings.GENERATION_MODEL
-        logger.info(f"Initialized GroundedRAGService with model: {self.generation_model}")
+        logger.info(f"Initialized GroundedRAGService in [{settings.AI_MODE.upper()}] mode.")
 
     def retrieve_relevant_chunks(self, query: str, top_k: Optional[int] = None) -> List[Citation]:
         """
-        Embeds user query, performs vector search against ChromaDB, and returns ranked citations.
+        Embeds user query using active embedding service, performs vector search against ChromaDB, and returns ranked citations.
         """
         k = top_k or settings.TOP_K_CHUNKS
         query_embedding = self.embedding_service.embed_query(query)
@@ -81,7 +82,7 @@ class GroundedRAGService:
 
     def generate_grounded_answer(self, query: str, citations: List[Citation]) -> str:
         """
-        Synthesizes a response using Ollama LLM strictly grounded on retrieved context citations.
+        Synthesizes a response using the active LLM service strictly grounded on retrieved context citations.
         """
         if not citations:
             return "I could not find relevant information in the enterprise documents to answer your query."
@@ -95,28 +96,17 @@ class GroundedRAGService:
 
         system_prompt = (
             "You are an enterprise document intelligence assistant. "
-            "Answer the user's question using ONLY the provided context citations below. "
+            "If the user asks for a summary or overview, provide a structured summary based on the provided context citations. "
+            "Otherwise, answer the user's question directly using ONLY the provided verified context citations below. "
             "If the context does not contain enough information, state that clearly. "
-            "Cite your sources using [1], [2], etc., matching the provided context numbers.\n\n"
-            f"Context:\n{context_str}\n\n"
-            f"User Query: {query}"
+            "Cite your sources using [1], [2], etc., matching the provided context numbers."
         )
 
-        try:
-            response = requests.post(
-                self.generation_url,
-                json={
-                    "model": self.generation_model,
-                    "prompt": system_prompt,
-                    "stream": False
-                },
-                timeout=60
-            )
-            response.raise_for_status()
-            return response.json().get("response", "").strip()
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to generate answer from Ollama LLM: {e}")
-            raise
+        return self.llm_service.generate_answer(
+            system_prompt=system_prompt,
+            context=context_str,
+            query=query
+        )
 
     def execute_query(self, query: str) -> RAGResponse:
         """

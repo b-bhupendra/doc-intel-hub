@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.core.config import settings
-from backend.core.health import check_directories, check_ollama_status
+from backend.core.health import check_directories, check_ai_engine_status
 from backend.api.routers import rag, documents, ingest, observability
 
 app = FastAPI(
@@ -34,14 +34,14 @@ app.include_router(observability.router, prefix="/api/v1/observability", tags=["
 def system_health_check():
     """Runs the preflight checks dynamically."""
     dirs_ok = check_directories()
-    ollama_ok = check_ollama_status()
+    ai_ok = check_ai_engine_status()
     
-    if dirs_ok and ollama_ok:
-        return {"status": "healthy", "ai_engine": "online"}
+    if dirs_ok and ai_ok:
+        return {"status": "healthy", "ai_engine": "online", "ai_mode": settings.AI_MODE}
     else:
         return JSONResponse(
             status_code=503, 
-            content={"status": "degraded", "ai_engine": "offline or missing models"}
+            content={"status": "degraded", "ai_engine": "offline or missing credentials", "ai_mode": settings.AI_MODE}
         )
 
 # Mount built frontend static assets if dist exists
