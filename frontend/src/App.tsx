@@ -37,7 +37,7 @@ export default function App() {
   const [selectedDocFilter, setSelectedDocFilter] = useState('all');
 
   const [settings, setSettings] = useState<AppSettings>({
-    backendUrl: 'http://localhost:8000/api/v1/rag/query',
+    backendUrl: '/api/v1/rag/query',
     useExternalBackend: false,
     topK: 4,
     abstentionThreshold: 0.25,
