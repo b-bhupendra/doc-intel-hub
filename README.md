@@ -49,11 +49,11 @@ ollama pull bge-m3:latest
 # Run Preflight Checks
 python -m backend.core.health
 
-# Start the FastAPI Backend
+# Start the FastAPI Backend (serves API and built SPA)
 uvicorn backend.api.main:app --reload --port 8000
 
-# Start the Observability Dashboard
-streamlit run dashboard/app.py
+# Start the React + Vite Frontend (Dev Mode)
+cd frontend && npm run dev
 ```
 
 ### 4. Run Test Suite & Evaluation
