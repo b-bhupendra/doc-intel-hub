@@ -46,10 +46,10 @@ export const PolicyExplorer: React.FC<PolicyExplorerProps> = ({
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight flex items-center space-x-2">
             <BookOpen className="w-5 h-5 text-blue-400" />
-            <span>Ingested Policy Repository</span>
+            <span>Ingested Document Repository</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Browse corporate standards, active bylaws, and compliance documentation loaded into the RAG vector index.
+            Browse enterprise files, research papers, reports, and knowledge base documentation indexed into the RAG vector engine.
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export const PolicyExplorer: React.FC<PolicyExplorerProps> = ({
           className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow transition flex-shrink-0"
         >
           <Upload className="w-4 h-4" />
-          <span>Ingest New Policy Document</span>
+          <span>Ingest New Document</span>
         </button>
       </div>
 

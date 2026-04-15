@@ -57,7 +57,7 @@ def rag_health_check(service: GroundedRAGService = Depends(get_rag_service)):
     return {
         "status": "online",
         "model": settings.GENERATION_MODEL,
-        "documents_count": 1,
+        "documents_count": 1 if chunks_count > 0 else 0,
         "chunks_count": chunks_count,
         "uptime_seconds": 3600,
         "active_backend": "FastAPI Grounded RAG Service",
@@ -66,40 +66,52 @@ def rag_health_check(service: GroundedRAGService = Depends(get_rag_service)):
 
 
 @router.get("/documents")
-def get_rag_documents():
-    """Frontend compatibility documents list endpoint."""
-    return {
-        "documents": [
-            {
-                "id": "DOC-DIAV-EXP-001",
-                "title": "Corporate Travel & Remote Expense Policy",
-                "code": "POL-DIAV-EXP-2026",
-                "version": "2.0",
-                "category": "Operations & Finance",
-                "last_updated": "2026-03-01",
-                "chunks_count": 8,
-                "summary": "Enterprise guidelines covering meal per-diems, lodging limits, and remote office stipends.",
-                "raw_text": "Section 1: Scope & Eligibility..."
-            }
-        ]
-    }
+def get_rag_documents(service: GroundedRAGService = Depends(get_rag_service)):
+    """Dynamically returns all documents indexed in the ChromaDB vector database."""
+    try:
+        data = service.collection.get(include=["metadatas"])
+        docs_map = {}
+        if data and data.get("metadatas"):
+            for meta in data["metadatas"]:
+                doc_title = meta.get("document_title", "Document")
+                version_id = meta.get("version_id", "1.0")
+                key = f"{doc_title}-{version_id}"
+                if key not in docs_map:
+                    docs_map[key] = {
+                        "id": f"DOC-{version_id}",
+                        "title": doc_title,
+                        "code": f"DOC-{version_id.upper()}",
+                        "version": version_id,
+                        "category": "Enterprise Documents",
+                        "last_updated": time.strftime("%Y-%m-%d"),
+                        "chunks_count": 0,
+                        "summary": f"Ingested enterprise document: {doc_title}",
+                        "raw_text": ""
+                    }
+                docs_map[key]["chunks_count"] += 1
+        
+        doc_list = list(docs_map.values())
+        return {"documents": doc_list}
+    except Exception as e:
+        logger.error(f"Error fetching documents: {e}")
+        return {"documents": []}
 
 
 @router.get("/chunks")
 def get_rag_chunks(service: GroundedRAGService = Depends(get_rag_service)):
-    """Frontend compatibility chunks inspector endpoint."""
+    """Dynamic chunks inspector endpoint from ChromaDB."""
     try:
-        data = service.collection.get(include=["documents", "metadatas"], limit=50)
+        data = service.collection.get(include=["documents", "metadatas"], limit=100)
         chunks = []
         if data and data.get("ids"):
             for chunk_id, doc, meta in zip(data["ids"], data["documents"], data["metadatas"]):
                 chunks.append({
                     "chunk_id": chunk_id,
                     "document_id": meta.get("version_id", "DOC-001"),
-                    "document_title": meta.get("document_title", "General Policy"),
+                    "document_title": meta.get("document_title", "Enterprise Document"),
                     "version_id": meta.get("version_id", "1.0"),
                     "content": doc,
-                    "section": meta.get("document_title", "Policy Clause"),
+                    "section": meta.get("document_title", "Document Section"),
                     "token_count": len(doc.split()),
                     "embedding_status": "indexed"
                 })

@@ -2,6 +2,8 @@ try:
     import pymupdf as fitz
 except ImportError:
     import fitz  # Fallback for older PyMuPDF versions
+import io
+from PIL import Image
 import pytesseract
 import re
 from typing import Dict, Any
@@ -14,8 +16,8 @@ class DocumentUnderstandingService:
     def __init__(self, quality_threshold: float = 0.65, dpi: int = 300):
         self.quality_threshold = quality_threshold
         self.dpi = dpi
-        # Configure Tesseract to look for English + Hindi (Devanagari)
-        self.tesseract_config = r'--oem 3 --psm 6 -l eng+hin'
+        # Configure Tesseract
+        self.tesseract_config = r'--oem 3 --psm 6 -l eng'
 
     def calculate_quality_score(self, text: str) -> float:
         """
@@ -77,9 +79,13 @@ class DocumentUnderstandingService:
         # Render the specific page to a high-res image (Pixmap) in memory
         pix = page.get_pixmap(dpi=self.dpi)
         img_bytes = pix.tobytes("png")
+        pil_image = Image.open(io.BytesIO(img_bytes))
         
-        # Run Multilingual OCR
-        ocr_text = pytesseract.image_to_string(img_bytes, config=self.tesseract_config)
+        # Run OCR
+        try:
+            ocr_text = pytesseract.image_to_string(pil_image, config=self.tesseract_config)
+        except Exception:
+            ocr_text = pytesseract.image_to_string(pil_image)
         ocr_quality = self.calculate_quality_score(ocr_text)
         
         return {

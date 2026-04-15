@@ -34,12 +34,11 @@ interface ChatAreaProps {
 }
 
 const SUGGESTED_QUERIES = [
-  "What is the maximum limit for the disability pension?",
-  "What is the mandatory cooling-off period for contract terminations?",
+  "What topics are covered in the GenAI and Data Science bootcamp?",
+  "What real-world hands-on projects are included?",
+  "What is the policy regarding travel expenses and per-diem limits?",
   "What are the data retention requirements for biometric logs?",
-  "What are the emergency bereavement leave provisions?",
-  "What is the gift acceptance monetary cap under Code of Conduct?",
-  "Can overtime exceed 16 hours in a workweek?"
+  "What are the key learning outcomes and tools taught?"
 ];
 
 export const ChatArea: React.FC<ChatAreaProps> = ({

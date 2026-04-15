@@ -175,8 +175,8 @@ export const IngestPolicyModal: React.FC<IngestPolicyModalProps> = ({
               <Upload className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base">Ingest New Policy Document</h3>
-              <p className="text-xs text-slate-400">Chunk, vectorize, and index into the RAG repository</p>
+              <h3 className="font-bold text-white text-base">Ingest Enterprise Document</h3>
+              <p className="text-xs text-slate-400">Extract, OCR, chunk, vectorize, and index into the RAG vector engine</p>
             </div>
           </div>
           <button

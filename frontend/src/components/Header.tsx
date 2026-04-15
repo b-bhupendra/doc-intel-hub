@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="hidden sm:inline-flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3.5 py-1.5 rounded-lg shadow transition"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>Ingest Policy</span>
+              <span>Ingest Document</span>
             </button>
           </div>
         </div>
@@ -100,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <FileText className="w-4 h-4" />
-            <span>Policy Repository</span>
+            <span>Document Explorer</span>
             {systemHealth && (
               <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.2 rounded-full border border-slate-700">
                 {systemHealth.documents_count}
