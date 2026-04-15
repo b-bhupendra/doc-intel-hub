@@ -279,6 +279,7 @@ $$\text{Recall@K} = \frac{\text{Number of Ground Truth Chunks in Top K Results}}
 - **OpenAPI 3.1 Interactive Sandbox**: Built-in developer spec modal testing API schemas and generating multi-language code snippets.
 
 ### 2. Engineering Roadmap & Pending Enhancements
-All upcoming architectural enhancements, coreference multi-turn chat memory, hybrid search, and asynchronous background worker queues are systematically tracked in **[`TODOS.md`](file:///home/bhupendra/Desktop/doc-intel-hub/TODOS.md)**.
+- Comprehensive engineering backlog: **[`TODOS.md`](file:///home/bhupendra/Desktop/doc-intel-hub/TODOS.md)**
+- Dedicated Conversational Memory & Coreference Design Document: **[`docs/CONVERSATIONAL_MEMORY_ARCHITECTURE.md`](file:///home/bhupendra/Desktop/doc-intel-hub/docs/CONVERSATIONAL_MEMORY_ARCHITECTURE.md)**
 
 
